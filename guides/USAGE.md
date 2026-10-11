@@ -24,7 +24,14 @@ macOS 기본 zsh에서는 자신의 `~/.zprofile`에 선언하고 새 로그인 
   PROJECT="$DEV_HOME/my-new-app"
   mkdir "$PROJECT"
   cp "$TEMPLATE/templates/AGENTS.md" "$PROJECT/AGENTS.md"
-  cp -R "$TEMPLATE/templates/docs" "$PROJECT/docs"
+  mkdir "$PROJECT/docs"
+  for name in PRD USER_FLOW SCREEN_SPEC HANDOFF ARCHITECTURE DATABASE API TASKS DECISIONS; do
+    cp "$TEMPLATE/templates/docs/$name.md" "$PROJECT/docs/$name.md"
+  done
+  cp "$TEMPLATE/templates/docs/MVP.md" "$PROJECT/docs/MVP_SCOPE.md"
+  for name in IDEA_BRIEF FUNCTIONAL_REQUIREMENTS NON_FUNCTIONAL_REQUIREMENTS PLANNING_STATUS PLANNING_REVIEW REQUIREMENT_CHANGES; do
+    cp "$TEMPLATE/templates/planning/${name}_TEMPLATE.md" "$PROJECT/docs/$name.md"
+  done
   cp -R "$TEMPLATE/standards" "$PROJECT/standards"
   cp "$TEMPLATE/VERSION" "$PROJECT/TEMPLATE_VERSION"
 )
@@ -34,14 +41,16 @@ macOS 기본 zsh에서는 자신의 `~/.zprofile`에 선언하고 새 로그인 
 
 ## 2. 기획과 인계
 
-ChatGPT에 기획 프롬프트와 필요한 템플릿 내용을 전달합니다. 대화만 믿지 말고 PRD → MVP → USER_FLOW → SCREEN_SPEC → HANDOFF 순서로 결과를 파일에 저장합니다.
-REQ-001 → FLOW-001 → SCR-001처럼 참조하고, 수용 기준은 관찰 가능한 결과로 작성합니다.
+[ChatGPT 프로젝트 가이드](CHATGPT_PROJECT_SETUP.md)에 따라 마스터 지침을 적용하고 [시작 프롬프트](../prompts/chatgpt/START_NEW_PROJECT.md)를 사용합니다.
+IDEA_BRIEF → PRD → FUNCTIONAL_REQUIREMENTS / NON_FUNCTIONAL_REQUIREMENTS / MVP_SCOPE → USER_FLOW / SCREEN_SPEC → PLANNING_REVIEW / HANDOFF 순서로 작성합니다. PLANNING_STATUS는 전 단계에서 요약을 유지하고 사용자 승인 후 다음 단계로 이동합니다.
+FR-001 → FLOW-001 → SCR-001처럼 연결하고, 수용 기준은 관찰 가능한 결과로 작성합니다. 기존 REQ ID는 승인 없이 바꾸지 않습니다.
 예: “제목이 비어 있으면 저장되지 않고 제목 입력란에 오류가 표시된다.”
 HANDOFF에 문서 버전, 확정 사항, 미결정과 영향, 보안 제약을 기록합니다. ChatGPT의 제안은 사용자 검토 전까지 확정으로 표시하지 않습니다.
 
 ## 3. Codex 설계
 
-Codex에서 앱 폴더를 열고 CODEX_DESIGN 프롬프트를 전달합니다. 실제 저장된 문서 경로를 알려 주세요. 대화가 자동 공유된다고 가정하지 않습니다.
+[인계 가이드](CHATGPT_TO_CODEX.md)에 따라 승인 문서를 커밋하고 HANDOFF와 기준 커밋을 전달합니다.
+Codex에서 앱 폴더를 열고 CODEX_DESIGN 프롬프트를 전달합니다. 첫 단계는 아키텍처 제안까지이며 사용자 승인 후 상세 설계와 TASK 분할을 진행합니다. 대화가 자동 공유된다고 가정하지 않습니다.
 아키텍처, 데이터, API, TASKS, DECISIONS를 검토합니다. 로컬 앱이면 서버/API는 해당 없음으로 처리할 수 있습니다.
 설계 완료 조건은 MVP 기능의 TASK 연결, 수용 기준, 기술 선택 근거, 차단 미결정 해소입니다.
 
@@ -62,3 +71,9 @@ AGENTS.md는 짧게 유지하고 세부 내용은 명시적으로 참조합니�
 
 재택근무 허용과 개인 기기·개인 AI 계정 사용 허용은 별개입니다. 회사 승인 범위를 확인하고 승인된 환경에서만 접근합니다.
 승인이 없거나 불명확하면 합성 예제로 일반적인 설계만 논의합니다. 코드 일부, 화면 캡처, 로그, 데이터베이스 스키마도 기밀일 수 있으므로 임의 반출하지 않습니다.
+
+## 7. 기존 앱과 문서 관리 부담
+
+기존 개발·설계 파일은 삭제·이동하지 않습니다. templates/planning의 PRD/MVP_SCOPE/USER_FLOW/SCREEN_SPEC/HANDOFF는 기존 원본을 가리키는 안내입니다. 신규 앱 복사 명령은 원본을 올바른 이름으로 복사합니다.
+기존 앱의 MVP.md·REQ ID를 자동 변경하지 않습니다. [워크플로](../standards/planning/PLANNING_WORKFLOW.md)의 호환 규칙을 따릅니다. 상세 요구사항은 FR/NFR에만 저장하고 다른 문서는 ID로 연결해 중복을 줄입니다.
+확정 요구사항 변경은 [변경 규칙](../standards/planning/REQUIREMENT_CHANGE_RULES.md), 상태 갱신은 [상태 규칙](../standards/planning/PLANNING_STATUS_RULES.md)을 사용합니다. 새 버전은 1.1.0이며 개인 DEV_HOME 선언과 전역 AGENTS.md는 변경하지 않습니다.
