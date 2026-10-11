@@ -1,0 +1,10 @@
+# 로컬 파일과 비밀 방지(별도 검토 필요)
+.DS_Store
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.jks
+*.keystore
